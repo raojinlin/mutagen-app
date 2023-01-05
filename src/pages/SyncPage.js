@@ -1,7 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 // @mui
 import {
   Card,
@@ -33,6 +34,7 @@ import Client from '../services/mutagen';
 import NewSynchronizeSession from '../components/new-synchronize-session-dialog';
 import { Button } from '../components/button'
 import {Message} from "../components/prompt-dialog";
+import EndpointStateDialog from "../components/endpoint-state-dialog";
 
 const client = new Client('ws://127.0.0.1:8081/synchronization');
 
@@ -99,6 +101,8 @@ export default function SyncPage() {
   const [currentSession, setCurrentSession] = useState(null);
   const [deleteSession, setDeleteSession] = useState({});
   const [error, setError] = useState({show: false, error: ''});
+  
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
@@ -110,6 +114,16 @@ export default function SyncPage() {
       refreshSessions();
     });
   };
+  
+  const handleSessionInfo = React.useCallback(() => {
+    setShowInfoDialog(true);
+    handleCloseMenu();
+  }, []);
+  
+  const handleSessionInfoDialogClose = useCallback(() => {
+    setCurrentSession(null);
+    setShowInfoDialog(false);
+  }, []);
 
   const handleOpenMenu = (event, session) => {
     setOpen(event.currentTarget);
@@ -361,6 +375,15 @@ export default function SyncPage() {
           refreshSessions();
         }}
       />
+      
+      {currentSession ? (
+        <EndpointStateDialog
+          open={showInfoDialog}
+          onClose={handleSessionInfoDialogClose}
+          alphaState={currentSession.alphaState}
+          betaState={currentSession.alphaState}
+        />
+      ) : null}
 
       <Message 
         type='message'
@@ -387,9 +410,9 @@ export default function SyncPage() {
           },
         }}
       >
-        <MenuItem>
-          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          编辑
+        <MenuItem onClick={handleSessionInfo}>
+          <FormatListBulletedIcon sx={{mr: 2}} />
+          详情
         </MenuItem>
 
         <MenuItem 

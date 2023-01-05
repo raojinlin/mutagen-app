@@ -1,8 +1,8 @@
 import React from "react";
+import pick from 'lodash/pick';
 import {Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Configuration from "./Configuration";
 import {Button} from "../button";
-import pick from 'lodash/pick';
 
 export default function ConfigurationDialog({ configuration, open, onClose, title, onChange, properties }) {
   const [isOpen, setIsOpen] = React.useState(open);
@@ -46,8 +46,8 @@ export default function ConfigurationDialog({ configuration, open, onClose, titl
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleConfirm}>Ok</Button>
+        <Button onClick={handleClose}>取消</Button>
+        <Button onClick={handleConfirm}>确认</Button>
       </DialogActions>
     </Dialog>
   );

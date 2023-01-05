@@ -398,7 +398,7 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
                   />
                 )}
                 label={(
-                  <span>Paused<Help>Indicates whether or not to create the session pre-paused.</Help></span>
+                  <span>暂停<Help>表示创建一个预暂停的会话</Help></span>
                 )}
               />
             </FormControl>

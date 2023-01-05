@@ -106,37 +106,20 @@ export default function Configuration({ configuration, onChange, properties=[]  
             <Help>
               <ul>
                 <li>
-                  <strong>SynchronizationMode_SynchronizationModeDefault</strong> represents an unspecified
-                  synchronization mode. It is not valid for use with Reconcile. It should
-                  be converted to one of the following values based on the desired default
-                  behavior.
+                  <strong>Two Way Safe</strong>
+                  表示双向同步模式，其中仅在不会丢失数据的情况下才执行自动冲突解决。
+                  具体来说，这意味着如果对端点上的相应内容未被修改或删除，则允许修改的内容传播到对端点。
+                  所有其他冲突都没有解决。
                 </li>
                 <li>
-                  <strong>SynchronizationMode_SynchronizationModeTwoWaySafe</strong> represents a
-                  bidirectional synchronization mode where automatic conflict resolution is
-                  performed only in cases where no data would be lost. Specifically, this
-                  means that modified contents are allowed to propagate to the opposite
-                  endpoint if the corresponding contents on the opposite endpoint are
-                  unmodified or deleted. All other conflicts are left unresolved.
+                  <strong>Two Way Resolved</strong>
+                  与 TwoWaySafe 相同，但指定 alpha 端点应在 alpha 和 beta 之间的任何冲突中自动获胜，包括 alpha 删除了 beta 修改的内容的情况。
                 </li>
                 <li>
-                  <strong>SynchronizationMode_SynchronizationModeTwoWayResolved</strong> is the same as
-                  SynchronizationMode_SynchronizationModeTwoWaySafe, but specifies that the
-                  alpha endpoint should win automatically in any conflict between alpha and
-                  beta, including cases where alpha has deleted contents that beta has
-                  modified.
+                  <strong>One Way Safe</strong> 表示一种单向同步模式，其中内容和更改从 alpha 传播到 beta，但不会覆盖 beta 上的任何创建或修改。
                 </li>
                 <li>
-                  <strong>SynchronizationMode_SynchronizationModeOneWaySafe</strong> represents a
-                  unidirectional synchronization mode where contents and changes propagate
-                  from alpha to beta, but won't overwrite any creations or modifications on
-                  beta.
-                </li>
-                <li>
-                  <strong>SynchronizationMode_SynchronizationModeOneWayReplica</strong> represents a
-                  unidirectional synchronization mode where contents on alpha are mirrored
-                  (verbatim) to beta, overwriting any conflicting contents on beta and
-                  deleting any extraneous contents on beta.
+                  <strong>One Way Replica</strong> 表示单向同步模式，其中 alpha 上的内容被（逐字）镜像到 beta，覆盖 beta 上的任何冲突内容并删除 beta 上的任何无关内容。
                 </li>
               </ul>
             </Help>
@@ -181,22 +164,12 @@ export default function Configuration({ configuration, onChange, properties=[]  
             <Help>
               <ul>
                 <li>
-                  <strong>ProbeMode_ProbeModeDefault</strong> represents an unspecified probe mode. It
-                  should be converted to one of the following values based on the desired
-                  default behavior.
+                  <strong>Probe</strong>
+                  指定文件系统行为应该使用临时文件来确定，或者如果可能的话，使用“快速路径”机制（例如文件系统格式检测）来提供快速但确定的文件系统行为确定。
                 </li>
 
                 <li>
-                  <strong>ProbeMode_ProbeModeProbe</strong> specifies that filesystem behavior should be
-                  determined using temporary files or, if possible, a "fast-path" mechanism
-                  (such as filesystem format detection) that provides quick but certain
-                  determination of filesystem behavior.
-                </li>
-
-                <li>
-                  <strong>ProbeMode_ProbeModeAssume</strong> specifies that filesystem behavior should be
-                  assumed based on the underlying platform. This is not as accurate as
-                  ProbeMode_ProbeModeProbe.
+                  <strong>Assume</strong> 指定应基于底层平台假定文件系统行为。 这不如 Probe 准确。
                 </li>
               </ul>
             </Help>
@@ -214,17 +187,10 @@ export default function Configuration({ configuration, onChange, properties=[]  
             <Help>
               <ul>
                 <li>
-                  <strong>ScanMode_ScanModeDefault</strong> represents an unspecified scan mode. It should
-                  be converted to one of the following values based on the desired default
-                  behavior.
+                  <strong>Full</strong> 指定应在每个同步周期执行完整扫描。
                 </li>
                 <li>
-                  <strong>ScanMode_ScanModeFull</strong> specifies that full scans should be performed on
-                  each synchronization cycle.
-                </li>
-                <li>
-                  <strong>ScanMode_ScanModeAccelerated</strong> specifies that scans should attempt to use
-                  watch-based acceleration.
+                  <strong>Accelerated</strong> 指定扫描应尝试使用基于监视的加速。
                 </li>
               </ul>
             </Help>
@@ -242,22 +208,13 @@ export default function Configuration({ configuration, onChange, properties=[]  
             <Help>
               <ul>
                 <li>
-                  <strong>StageMode_StageModeDefault</strong> represents an unspecified staging mode. It
-                  should be converted to one of the following values based on the desired
-                  default behavior.
+                  <strong>Mutagen</strong>指定文件应暂存在 Mutagen 数据目录中。
                 </li>
                 <li>
-                  <strong>StageMode_StageModeMutagen</strong> specifies that files should be staged in the
-                  Mutagen data directory.
+                  <strong>Neighboring</strong> 指定文件应暂存在同步根附近的目录中。
                 </li>
                 <li>
-                  <strong>StageMode_StageModeNeighboring</strong> specifies that files should be staged in a
-                  directory which neighbors the synchronization root.
-                </li>
-                <li>
-                  <strong>StageMode_StageModeInternal</strong> specified that files should be staged in a
-                  directory contained within a synchronization root. This mode will only
-                  function if the synchronization root already exists.
+                  <strong>Internal</strong> 指定文件应暂存在同步根中包含的目录中。 这种模式只有在同步根已经存在的情况下才会起作用。
                 </li>
               </ul>
             </Help>
@@ -276,25 +233,17 @@ export default function Configuration({ configuration, onChange, properties=[]  
             <Help>
               <ul>
                 <li>
-                  <strong>WatchMode_WatchModeDefault</strong> represents an unspecified watch mode. It
-                  should be converted to one of the following values based on the desired
-                  default behavior.
+                  <strong>Portable</strong> 
+                  指定应使用本机递归监视来监视支持它的系统上的路径（如果这些路径位于主目录下）。
+                  在这些情况下，将建立对整个主目录的监视并过滤与指定路径有关的事件。
+                  在所有其他系统和所有其他路径上，使用基于轮询的监视。
                 </li>
                 <li>
-                  <strong>WatchMode_WatchModePortable</strong> specifies that native recursive watching
-                  should be used to monitor paths on systems that support it if those paths
-                  fall under the home directory. In these cases, a watch on the entire home
-                  directory is established and filtered for events pertaining to the
-                  specified path. On all other systems and for all other paths, poll-based
-                  watching is used.
+                  <strong>ForcePoll</strong>
+                  指定仅应使用基于轮询的监视。
                 </li>
                 <li>
-                  <strong>WatchMode_WatchModeForcePoll</strong> specifies that only poll-based watching
-                  should be used.
-                </li>
-                <li>
-                  <strong>WatchMode_WatchModeNoWatch</strong> specifies that no watching should be used
-                  (i.e. no events should be generated).
+                  <strong>NoWatch</strong> 指定不应使用监视（即不应生成任何事件）。
                 </li>
               </ul>
             </Help>
@@ -339,23 +288,6 @@ export default function Configuration({ configuration, onChange, properties=[]  
             label={(
               <>
                 忽略版本控制文件
-                <Help>
-                  <ul>
-                    <li>
-                      <strong>IgnoreVCSMode_IgnoreVCSModeDefault</strong> represents an unspecified VCS ignore
-                      mode. It is not valid for use with Scan. It should be converted to one of
-                      the following values based on the desired default behavior.
-                    </li>
-                    <li>
-                      <strong>IgnoreVCSMode_IgnoreVCSModeIgnore</strong> indicates that VCS directories should
-                      be ignored.
-                    </li>
-                    <li>
-                      <strong>IgnoreVCSMode_IgnoreVCSModePropagate</strong> indicates that VCS directories
-                      should be propagated.
-                    </li>
-                  </ul>
-                </Help>
               </>
             )}
           />
@@ -368,21 +300,12 @@ export default function Configuration({ configuration, onChange, properties=[]  
             <Help>
               <ul>
                 <li>
-                  <strong>PermissionsMode_PermissionsModeDefault</strong> represents an unspecified
-                  permissions mode. It is not valid for use with Scan. It should be
-                  converted to one of the following values based on the desired default
-                  behavior.
+                  <strong>Portable</strong> 
+                  指定应以可移植的方式传播权限。 这意味着只有可执行位由 Mutagen 管理，并且使用所有权和基本文件权限的手动规范。
                 </li>
                 <li>
-                  <strong>PermissionsMode_PermissionsModePortable</strong> specifies that permissions should
-                  be propagated in a portable fashion. This means that only executability
-                  bits are managed by Mutagen and that manual specifications for ownership
-                  and base file permissions are used.
-                </li>
-                <li>
-                  <strong>PermissionsMode_PermissionsModeManual</strong> specifies that only manual
-                  permission specifications should be used. In this case, Mutagen does not
-                  perform any propagation of permissions.
+                  <strong>Manual</strong>
+                  指定仅应使用手动权限规范。 在这种情况下，Mutagen 不会执行任何权限传播。
                 </li>
               </ul>
             </Help>

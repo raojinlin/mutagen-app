@@ -8,7 +8,11 @@ import {
   List,
   ListItem,
   Button,
-  Typography
+  Typography,
+  Checkbox,
+  Label,
+  FormControl,
+  FormControlLabel,
 } from '@mui/material';
 import humanSize from 'human-size';
 
@@ -52,11 +56,17 @@ function State({ state, className, title }) {
  * @param betaState {EndpointState}
  * @param open {boolean}
  * @param onClose {(function())}
+ * @param client {Client}
  * @constructor
  */
 
-export default function EndpointStateDialog({ alphaState, betaState, open, onClose }) {
+export default function EndpointStateDialog({ session: _session , open, onClose, client, seconds=5, sessionId }) {
+  const [session, setSession] = React.useState(_session);
   const [isOpen, setIsOpen] = React.useState(open);
+  const [intervalRefresh, setIntervalRefresh] = React.useState(false);
+  const intervalId = React.useRef(0);
+  
+  const {alphaState, betaState} = session;
   
   React.useEffect(() => {
     setIsOpen(open);
@@ -65,11 +75,42 @@ export default function EndpointStateDialog({ alphaState, betaState, open, onClo
   const handleClose = React.useCallback(() => {
     setIsOpen(false);
     onClose();
+    clearInterval(intervalId.current);
   }, [onClose]);
+  
+  const handleRefresh = React.useCallback((e) => {
+    setIntervalRefresh(e.target.checked);
+    
+    if (e.target.checked) {
+      intervalId.current = setInterval(() => {
+        client.sendMessage('list', {id: session.session.identifier}).then(r => {
+          setSession(r.data.sessionStates[0]);
+        });
+      }, seconds*1000);
+    } else if (intervalId.current) {
+      clearInterval(intervalId.current);
+      intervalId.current = 0;
+    }
+  }, [seconds, session]);
   
   return (
     <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle>会话状态</DialogTitle>
+      <DialogTitle>
+        会话状态 ({session.status})
+        <span>
+          <FormControl style={{'float': 'right'}}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={intervalRefresh}
+                  onChange={handleRefresh}
+                /> 
+              }
+              label={<Typography>自动刷新(5s)</Typography>}
+            />
+          </FormControl>
+        </span>
+      </DialogTitle>
       <DialogContent sx={{'&': {width: '500px'}}}>
         <Box 
           sx={{

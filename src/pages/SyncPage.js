@@ -75,7 +75,7 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (session) => session.session.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis.map((el) => el[0]);
 }
@@ -105,6 +105,21 @@ export default function SyncPage() {
   const [showInfoDialog, setShowInfoDialog] = useState(false);
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  
+  const handleSelectedSessionDelete = () => {
+    if (!selected.length) {
+      return;
+    }
+
+    Promise.all(selected.map(id => {
+      return client.terminate({id}).then(() => {
+
+      });
+    })).then(() => {
+      setSelected([]);
+      refreshSessions();
+    })
+  };
 
   const handleSessionDelete = () => {
     const id = currentSession.session.identifier;
@@ -223,7 +238,12 @@ export default function SyncPage() {
         </Stack>
 
         <Card>
-          <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+          <UserListToolbar 
+            numSelected={selected.length}
+            filterName={filterName} 
+            onFilterName={handleFilterByName} 
+            onDelete={handleSelectedSessionDelete}
+          />
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
@@ -380,8 +400,8 @@ export default function SyncPage() {
         <EndpointStateDialog
           open={showInfoDialog}
           onClose={handleSessionInfoDialogClose}
-          alphaState={currentSession.alphaState}
-          betaState={currentSession.alphaState}
+          session={currentSession}
+          client={client}
         />
       ) : null}
 

@@ -3,6 +3,8 @@ import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import React, {useState, useEffect, useCallback} from 'react';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 // @mui
 import {
   Card,
@@ -94,18 +96,18 @@ export default function SyncPage() {
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  
+
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState([]);
 
   const [currentSession, setCurrentSession] = useState(null);
   const [deleteSession, setDeleteSession] = useState({});
   const [error, setError] = useState({show: false, error: ''});
-  
+
   const [showInfoDialog, setShowInfoDialog] = useState(false);
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
+
   const handleSelectedSessionDelete = () => {
     if (!selected.length) {
       return;
@@ -129,12 +131,12 @@ export default function SyncPage() {
       refreshSessions();
     });
   };
-  
+
   const handleSessionInfo = React.useCallback(() => {
     setShowInfoDialog(true);
     handleCloseMenu();
   }, []);
-  
+
   const handleSessionInfoDialogClose = useCallback(() => {
     setCurrentSession(null);
     setShowInfoDialog(false);
@@ -238,10 +240,10 @@ export default function SyncPage() {
         </Stack>
 
         <Card>
-          <UserListToolbar 
+          <UserListToolbar
             numSelected={selected.length}
-            filterName={filterName} 
-            onFilterName={handleFilterByName} 
+            filterName={filterName}
+            onFilterName={handleFilterByName}
             onDelete={handleSelectedSessionDelete}
           />
 
@@ -284,7 +286,7 @@ export default function SyncPage() {
                             {name}
                           </Typography>
                           <Tooltip title={identifier}>
-                            <Typography 
+                            <Typography
                               variant="span"
                               style={{width: '100px', display: 'inline-block', textOverflow: 'ellipsis', overflow: 'hidden'}}
                             >
@@ -301,16 +303,20 @@ export default function SyncPage() {
                         <TableCell align="left">
                           {beta.path}
                           <div>
-                            <Label color='info' style={{marginBottom: 10}}>{beta.protocol}</Label>
-                            {beta.user ? <Label color='info'>{beta.user}</Label> : null}
-                            {beta.host ? <Label color='info'>{beta.host}</Label> : null}
-                            {beta.port ? <Label color='info'>{beta.port}</Label> : null}
+                            {beta.protocol === 'ssh' ? (
+                              <>
+                                <Label color='info' style={{marginBottom: 10}}>{beta.protocol}</Label>
+                                {beta.user ? <Label color='info'>{beta.user}</Label> : null}
+                                {beta.host ? <Label color='info'>{beta.host}</Label> : null}
+                                {beta.port ? <Label color='info'>{beta.port}</Label> : null}
+                              </>
+                            ) : null}
                           </div>
                         </TableCell>
 
                         <TableCell align="left">
                           {labels ? Object.keys(labels).map(label => (
-                            <Label 
+                            <Label
                               color='success'
                               key={label}
                               style={{marginRight: 10, marginBottom: 5}}
@@ -333,6 +339,9 @@ export default function SyncPage() {
                         </TableCell>
 
                         <TableCell align="right">
+                          <IconButton size='large' color='inherit'>
+                            {!paused ? <PauseIcon /> : <PlayArrowIcon />}
+                          </IconButton>
                           <IconButton size="large" color="inherit" onClick={e => handleOpenMenu(e, row)}>
                             <Iconify icon={'eva:more-vertical-fill'} />
                           </IconButton>
@@ -386,16 +395,16 @@ export default function SyncPage() {
         </Card>
       </Container>
 
-      <NewSynchronizeSession 
+      <NewSynchronizeSession
         client={client}
         open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)} 
+        onClose={() => setCreateDialogOpen(false)}
         onCreated={session => {
           setCreateDialogOpen(false);
           refreshSessions();
         }}
       />
-      
+
       {currentSession ? (
         <EndpointStateDialog
           open={showInfoDialog}
@@ -405,12 +414,12 @@ export default function SyncPage() {
         />
       ) : null}
 
-      <Message 
+      <Message
         type='message'
         title={'ERROR'}
         message={error.error}
         open={error.show}
-        onClose={() => setError({...error, show: false})} 
+        onClose={() => setError({...error, show: false})}
       />
       <Popover
         open={Boolean(open)}
@@ -435,9 +444,9 @@ export default function SyncPage() {
           详情
         </MenuItem>
 
-        <MenuItem 
+        <MenuItem
           sx={{ color: 'error.main' }}
-          disabled={currentSession ? deleteSession[currentSession.session.identifier] : false} 
+          disabled={currentSession ? deleteSession[currentSession.session.identifier] : false}
           onClick={handleSessionDelete}
         >
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />

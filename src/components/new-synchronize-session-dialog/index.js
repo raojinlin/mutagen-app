@@ -35,14 +35,14 @@ import Help from "../help";
 import Overview from "../sync-configuration/Overview";
 
 const endpointSpecifyProperties = [
-  'probeMode', 
+  'probeMode',
   'scanMode',
   'stageMode',
-  'watchMode', 
+  'watchMode',
   'watchPollingInterval',
   'defaultFileMode',
-  'defaultDirectoryMode', 
-  'defaultOwner', 
+  'defaultDirectoryMode',
+  'defaultOwner',
   'defaultGroup'
 ];
 
@@ -55,8 +55,8 @@ const endpointSpecifyProperties = [
  * @property {string} host
  * */
 
-/** 
- * @param {URL} url
+/**
+ * @param {URL|{}} url
  * @param {string} id
  * @param {string|React.Component} label
  * @param {string|React.Component} children
@@ -64,19 +64,19 @@ const endpointSpecifyProperties = [
  */
 function URLField({ url, id, label, children, onChange }) {
   const [value, setValue] = React.useState(url);
-  
+
   const handleFieldChange = (field, val) => {
     const newValue = {...value, [field]: val};
     setValue(newValue);
     onChange(newValue);
   };
-  
+
   return (
     <FormGroup>
       <FormLabel>
         {label || children}
       </FormLabel>
-      <Box 
+      <Box
         sx={{
           '&': {
             display: 'flex'
@@ -116,10 +116,10 @@ function URLField({ url, id, label, children, onChange }) {
             </FormControl>
             <FormControl sx={{m: 1}} size='small'>
               <InputLabel>主机</InputLabel>
-              <Input 
+              <Input
                 type='text'
                 value={value.host}
-                onChange={e => handleFieldChange('host', e.target.value)} 
+                onChange={e => handleFieldChange('host', e.target.value)}
                 required
               />
             </FormControl>
@@ -150,7 +150,7 @@ function URLField({ url, id, label, children, onChange }) {
 
 
 /**
- * 
+ *
  * @param open {boolean}
  * @param onClose {(function(boolean))}
  * @param client import('../services/mutagen')
@@ -160,7 +160,7 @@ function URLField({ url, id, label, children, onChange }) {
  */
 export default function NewSynchronizeSession({ open, onClose, client, onCreated }) {
   const [isOpen, setIsOpen] = React.useState(open);
-  const [creation, setCreation] = React.useState({
+  const [creationRequest, setCreationRequest] = React.useState({
     "name": "",
     "labels": {
       // "created_by": "mutagen-server",
@@ -178,7 +178,7 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
       // "path": "/tmp/xxx_sync"
     }
   });
-  
+
   const [newLabel, setNewLabel] = React.useState('');
   const [creating, setCreating] = React.useState(false);
   const [showMessageModal, setShowMessageModal] = React.useState(false);
@@ -194,18 +194,18 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
   const handleOpen = React.useCallback(() => {
     setIsOpen(true);
   }, [setIsOpen]);
-  
+
   const handleConfigChange = React.useCallback(configuration => {
-    setCreation({...creation, configuration})
-  }, [creation]);
-  
+    setCreationRequest({...creationRequest, configuration})
+  }, [creationRequest]);
+
   const handleAlphaConfigChange = React.useCallback(configurationAlpha => {
-    setCreation({...creation, configurationAlpha});
-  }, [creation]);
+    setCreationRequest({...creationRequest, configurationAlpha});
+  }, [creationRequest]);
 
   const handleBetaConfigChange = React.useCallback(configurationBeta => {
-    setCreation({...creation, configurationBeta});
-  }, [creation]);
+    setCreationRequest({...creationRequest, configurationBeta});
+  }, [creationRequest]);
 
   const handleClose = React.useCallback(() => {
     setIsOpen(false);
@@ -213,7 +213,7 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
       onClose(true);
     }
   }, [setIsOpen, onClose]);
-  
+
   const handleConfirm = React.useCallback(() => {
     // if (x === 1) {
     //   setShowMessageModal(true);
@@ -231,27 +231,27 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
         handlemessage(data);
         setCreating(false);
       });
-    
+
     client.dispatch.on('prompt', (data) => {
       setShowPromptModal(true);
       setShowMessageModal(false);
       setPromptMessage(data.message);
     });
-    
+
     client.dispatch.on('ack', (data) => {
       setShowMessageModal(false);
       setShowPromptModal(false);
       setPromptMessage('');
-      
+
       if (data.data) {
         setCreating(false);
       }
     });
-    
+
     setCreating(true);
     client.connect().then(() => {
       client.create({
-        ...creation,
+        ...creationRequest,
         // alphaConfiguration: creation.alphaConfiguration || creation.configuration,
         // betaConfiguration: creation.betaConfiguration || creation.configuration
       }).then(r => {
@@ -261,28 +261,28 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
         }
       });
     });
-  }, [client, creation]);
-  
+  }, [client, creationRequest]);
+
   const handleLabelAdd = React.useCallback((e) => {
     if (!e.target.value) {
       return;
     }
-    
+
     const [label, labelValue] = e.target.value.split(/=|:/);
     if (!label || !labelValue) {
       return;
     }
-    
-    setCreation({...creation, labels: {...creation.labels, [label]: labelValue}});
+
+    setCreationRequest({...creationRequest, labels: {...creationRequest.labels, [label]: labelValue}});
     setNewLabel('');
-  }, [creation]);
-  
+  }, [creationRequest]);
+
   const handleLabelRemove = React.useCallback((label) => {
-    const c = {...creation, labels: {...creation.labels}};
+    const c = {...creationRequest, labels: {...creationRequest.labels}};
     delete c.labels[label];
-    setCreation(c);
-  }, [creation]);
-  
+    setCreationRequest(c);
+  }, [creationRequest]);
+
   return (
     <Dialog
       open={isOpen}
@@ -291,13 +291,13 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
       aria-labelledby="scroll-dialog-title"
       aria-describedby="scroll-dialog-description"
     >
-      <DialogTitle id="scroll-dialog-title">新建同步会话</DialogTitle>   
+      <DialogTitle id="scroll-dialog-title">新建同步会话</DialogTitle>
       <DialogContent dividers>
-        <Prompt 
-          title='提示' 
-          message={promptMessage} 
-          open={showPromptModal} 
-          onClose={() => setShowPromptModal(false)} 
+        <Prompt
+          title='提示'
+          message={promptMessage}
+          open={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
           onConfirm={value => {
             client.answer(value);
           }}
@@ -307,7 +307,7 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
           message={promptMessage}
           type='message'
           open={showMessageModal}
-          onClose={() => setShowMessageModal(false)} 
+          onClose={() => setShowMessageModal(false)}
         />
         <Box sx={{".row": {marginBottom: "10px", minWidth: 500}}}>
           <div className="row">
@@ -315,45 +315,45 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
               <FormLabel>名称</FormLabel>
               <TextField
                 id="sync-name"
-                value={creation.name}
-                onChange={e => setCreation({...creation, name: e.target.value})}
-              />  
+                value={creationRequest.name}
+                onChange={e => setCreationRequest({...creationRequest, name: e.target.value})}
+              />
             </FormControl>
           </div>
           <div className="row">
-            <URLField 
-              url={creation.alpha}
-              id={'sync-alpha'} 
-              onChange={(url) => setCreation({...creation, alpha: url})}
+            <URLField
+              url={creationRequest.alpha}
+              id={'sync-alpha'}
+              onChange={(url) => setCreationRequest({...creationRequest, alpha: url})}
             >
               源地址
             </URLField>
             <div>
-              {creation.configurationAlpha && Object.keys(creation.configurationAlpha).length ?
-                <Overview configuration={creation.configurationAlpha} /> : null
+              {creationRequest.configurationAlpha && Object.keys(creationRequest.configurationAlpha).length ?
+                <Overview configuration={creationRequest.configurationAlpha} /> : null
               }
               <Button onClick={() => setShowAlphaConfiguration(true)}>+ 添加配置</Button>
               <ConfigurationDialog
                 properties={endpointSpecifyProperties}
                 title='源端配置'
-                open={showAlphaConfiguration} 
-                onClose={() => setShowAlphaConfiguration(false)} 
-                configuration={creation.configurationAlpha}
+                open={showAlphaConfiguration}
+                onClose={() => setShowAlphaConfiguration(false)}
+                configuration={creationRequest.configurationAlpha}
                 onChange={handleAlphaConfigChange}
               />
             </div>
           </div>
           <div className="row">
-            <URLField 
-              url={creation.beta}
+            <URLField
+              url={creationRequest.beta}
               id={'beta'}
-              onChange={(url) => setCreation({...creation, beta: url})}
+              onChange={(url) => setCreationRequest({...creationRequest, beta: url})}
             >
               目标地址
             </URLField>
             <div>
-              {creation.configurationBeta && Object.keys(creation.configurationBeta).length ? 
-                <Overview configuration={creation.configurationBeta} /> : null
+              {creationRequest.configurationBeta && Object.keys(creationRequest.configurationBeta).length ?
+                <Overview configuration={creationRequest.configurationBeta} /> : null
               }
               <Button onClick={() => setShowBetaConfiguration(true)}>+ 添加配置</Button>
               <ConfigurationDialog
@@ -361,7 +361,7 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
                 title='目标端配置'
                 open={showBetaConfiguration}
                 onClose={() => setShowBetaConfiguration(false)}
-                configuration={creation.configurationBeta}
+                configuration={creationRequest.configurationBeta}
                 onChange={handleBetaConfigChange}
               />
             </div>
@@ -378,9 +378,9 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
                 onKeyDown={e => e.keyCode === 13 && handleLabelAdd(e)}
               />
               <Box sx={{'&': {marginTop: '10px'}}}>
-                {Object.keys(creation.labels).map((label, i) => (
+                {Object.keys(creationRequest.labels).map((label, i) => (
                   <Label color={colors[i]} key={label}>
-                    {label}: {creation.labels[label]}
+                    {label}: {creationRequest.labels[label]}
                     <CloseIcon sx={{'&': {fontSize: 14}}} onClick={() => handleLabelRemove(label)} />
                   </Label>
                 ))}
@@ -389,16 +389,16 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
           </div>
           <div className={"row"}>
             <FormControl>
-              <FormControlLabel 
+              <FormControlLabel
                 control={(
                   <Checkbox
                     name='paused'
-                    checked={creation.paused}
-                    onChange={e => setCreation({...creation, paused: e.target.checked})}
+                    checked={creationRequest.paused}
+                    onChange={e => setCreationRequest({...creationRequest, paused: e.target.checked})}
                   />
                 )}
                 label={(
-                  <span>暂停<Help>表示创建一个预暂停的会话</Help></span>
+                  <span>暂停<Help>表示创建一个暂停的会话</Help></span>
                 )}
               />
             </FormControl>
@@ -408,14 +408,14 @@ export default function NewSynchronizeSession({ open, onClose, client, onCreated
               更多配置
             </AccordionSummary>
             <AccordionDetails>
-              <Configuration configuration={creation.configuration} onChange={handleConfigChange} />
+              <Configuration configuration={creationRequest.configuration} onChange={handleConfigChange} />
             </AccordionDetails>
           </Accordion>
         </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>取消</Button>
-        <Button onClick={handleConfirm} loading={creating}>
+        <Button variant='contained' onClick={handleConfirm} loading={creating}>
           创建
         </Button>
       </DialogActions>

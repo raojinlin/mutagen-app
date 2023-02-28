@@ -28,7 +28,7 @@ import humanSize from 'human-size';
 
 
 /**
- * 
+ *
  * @param state {EndpointState}
  * @param className {string}
  * @param title {string}
@@ -51,7 +51,7 @@ function State({ state, className, title }) {
 
 
 /**
- * 
+ *
  * @param alphaState {EndpointState}
  * @param betaState {EndpointState}
  * @param open {boolean}
@@ -65,22 +65,22 @@ export default function EndpointStateDialog({ session: _session , open, onClose,
   const [isOpen, setIsOpen] = React.useState(open);
   const [intervalRefresh, setIntervalRefresh] = React.useState(false);
   const intervalId = React.useRef(0);
-  
+
   const {alphaState, betaState} = session;
-  
+
   React.useEffect(() => {
     setIsOpen(open);
   }, [open]);
-  
+
   const handleClose = React.useCallback(() => {
     setIsOpen(false);
     onClose();
     clearInterval(intervalId.current);
   }, [onClose]);
-  
+
   const handleRefresh = React.useCallback((e) => {
     setIntervalRefresh(e.target.checked);
-    
+
     if (e.target.checked) {
       intervalId.current = setInterval(() => {
         client.sendMessage('list', {id: session.session.identifier}).then(r => {
@@ -92,11 +92,11 @@ export default function EndpointStateDialog({ session: _session , open, onClose,
       intervalId.current = 0;
     }
   }, [seconds, session]);
-  
+
   return (
     <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle>
-        会话状态 ({session.status})
+      <DialogTitle style={{lineHeight: '42px'}}>
+        会话状态 {session.status ? <>({session.status})</> : null}
         <span>
           <FormControl style={{'float': 'right'}}>
             <FormControlLabel
@@ -104,7 +104,7 @@ export default function EndpointStateDialog({ session: _session , open, onClose,
                 <Checkbox
                   checked={intervalRefresh}
                   onChange={handleRefresh}
-                /> 
+                />
               }
               label={<Typography>自动刷新(5s)</Typography>}
             />
@@ -112,7 +112,7 @@ export default function EndpointStateDialog({ session: _session , open, onClose,
         </span>
       </DialogTitle>
       <DialogContent sx={{'&': {width: '500px'}}}>
-        <Box 
+        <Box
           sx={{
             '&': {
               display: 'flex',
